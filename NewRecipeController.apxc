@@ -1,0 +1,160 @@
+public with sharing class NewRecipeController {
+    
+    public String newIngredientName {get; set;}
+    public Integer newIngredientAmount {get; set;}
+    public Integer newIngredientCalorie {get; set;}
+    public String newIngredientUnit {get; set;}
+    public List<Ingredient__c> listIngredient {get; set;}
+    public List<Ingredient__c> containsIngredientList {get; set;}
+    public List<Specific_Ingredient__c> listIgredForRecipe {get; set;}
+    public List<Specific_Ingredient__c> containsSpecIngredList {get; set;}
+    public String newRecipe {get; set;}
+    public String recipeName {get;set;}
+    public String newSpecIngr {get; set;}
+    public Integer newSpecIngrQuantity {get; set;}
+    public List<Recipe__c> listRecipe {get; set;}
+    public List<Recipe__c> containsRecipeList {get; set;}
+    public List<Specific_Ingredient__c> recipeIngredList {get; set;}
+    public List<SelectOption> newListFromPicklist {get; set;}
+    public List<Specific_Ingredient__c> testlist {get;set;}
+    
+    public NewRecipeController(){
+        listIngredient = [SELECT Name, Amount__c, Calories__c, Unit__c FROM Ingredient__c ORDER BY Name];
+        listRecipe = [SELECT Name FROM Recipe__c ORDER BY Name];
+        listIgredForRecipe = [SELECT Name, Quantity__c, Unit__c  FROM Specific_Ingredient__c WHERE Recipe__r.Name =: recipeName ORDER BY Name];
+    }
+    
+    public List<SelectOption> getUnits() { //get unit picklist
+    	List<SelectOption> options = new List<SelectOption>();
+        options.add(new SelectOption('', '--- Select Unit ---'));
+        for (Ingredient__c ingredItem : [SELECT Unit__c FROM Ingredient__c]){
+        	options.add(new SelectOption(ingredItem.Unit__c, ingredItem.Unit__c)); 			
+        }
+        return options;
+    }
+    
+	public List<SelectOption> getRecipes() { //get recipe name picklist
+    	List<SelectOption> options = new List<SelectOption>();
+        options.add(new SelectOption('', '--- Select Recipe Name ---'));
+        for (Recipe__c recipeItem : [SELECT Name FROM Recipe__c]){
+            options.add(new SelectOption(recipeItem.Id, recipeItem.Name));
+        }
+        return options;
+    }
+    
+    public List<SelectOption> getIngredients(){ //get recipe name picklist
+    	List<SelectOption> options = new List<SelectOption>();
+        options.add(new SelectOption('', '--- Select Ingredient ---'));
+        for (Ingredient__c ingredItem : [SELECT Name FROM Ingredient__c]){
+            options.add(new SelectOption(ingredItem.Id, ingredItem.Name));
+        }
+        return options;
+    } 
+            
+    public Pagereference addIngredient(){ //add new ingredient in listIngredient
+        if(String.isEmpty(newIngredientName) || String.isEmpty(String.valueOf(newIngredientAmount)) || String.isEmpty(String.valueOf(newIngredientCalorie))){
+			ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'All fields must have values'));            
+        }                    
+        containsIngredientList = [SELECT Name FROM Ingredient__c WHERE Name =: newIngredientName];
+        if(containsIngredientList.size() != 0){
+                ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'A ingredient with such name is already existing'));
+        }
+        else {
+            try {             	                
+            	Ingredient__c newIngred = new Ingredient__c();
+                newIngred.Name = newIngredientName;
+            	newIngred.Amount__c = newIngredientAmount;
+            	newIngred.Calories__c = newIngredientCalorie;
+                if (newIngredientUnit == 'qty'){
+                	newIngred.Unit__c = 'qty';
+                }
+                else if (newIngredientUnit == 'ml'){
+                    newIngred.Unit__c = 'ml';
+                }
+                else {
+                    newIngred.Unit__c = 'gr';  
+                }            			
+                listIngredient.add(newIngred);
+                upsert listIngredient;
+				ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO,'New ingredient succeseful created'));
+            }
+            catch(Exception e){
+                System.debug(e.getMessage());
+            }
+        }		    
+        return null;
+    }
+
+    public PageReference back(){
+        return Page.ChefPageAfterLogin;
+    }  
+    
+    public PageReference addName(){ //add recipe name
+        if(String.isEmpty(newRecipe)){
+            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR, 'This field must have a value'));
+        }
+        else {
+            containsRecipeList = [SELECT Name FROM Recipe__c WHERE Name =: newRecipe];
+        	if (containsRecipeList.size() != 0){
+				ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'A recipe with such name is already existing'));            
+        	}  
+        	else{
+            	Recipe__c newR = new Recipe__c();
+            	newR.Name = newRecipe;
+            	listRecipe.add(newR);
+            	upsert listRecipe;
+				ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO, 'New recipe name succeseful created'));
+        	}          
+        }           
+        return null;
+    }
+    
+    public PageReference addIngredToRecipe(){
+        if(String.isEmpty(recipeName) || (newSpecIngrQuantity <= 0) || String.isEmpty(newSpecIngr) || String.isEmpty(newIngredientUnit)){
+            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'All fields must have values'));
+        }
+        else{
+            try {
+        		Specific_Ingredient__c newSI = new Specific_Ingredient__c();
+            	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO, '0'));
+            	if (newIngredientUnit == 'qty'){
+               		newSI.Unit__c = 'qty';
+            	}
+            	else if (newIngredientUnit == 'ml'){
+                	newSI.Unit__c = 'ml';
+            	}
+            	else {
+                	newSI.Unit__c = 'gr';  
+            	} 
+            	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO, '1'));  
+        		newSI.Name = newSpecIngr;
+            	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO, '2')); 
+            	newSI.Quantity__c = newSpecIngrQuantity;
+            	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO, '3'));  
+            	upsert listIngredient;
+                upsert listRecipe;
+            	for (Ingredient__c i : listIngredient){
+                	if (i.Name == newSpecIngr){
+                    	//newSi.Ingredient__r = i;
+                    	newSI.Ingredient__c = i.Id;
+                    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO, '4'));  
+                	}
+            	}
+            	for (Recipe__c r : listRecipe) {
+                	if (r.Name == recipeName){
+                    	newSI.Recipe__c = r.Id;
+                    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO, '5')); 
+                	}
+            	}
+        		listIgredForRecipe.add(newSI);
+            	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO, '6'));  
+        		insert listIgredForRecipe;
+        		ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO, 'New ingredient to recipe succeseful added'));  
+        	} 
+            catch (Exception e){
+            	System.debug(e.getMessage());
+        	}
+        }               		
+        return null;
+    }            
+}
