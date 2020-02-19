@@ -1,0 +1,38 @@
+public class SignInController {
+    public String login {get; set;}
+    public String password {get; set;}
+    public final String startURL = 'https://bakery-cononut-dev-ed--c.visualforce.com/apex/ChefPageAfterLogin';
+    public List<Chef__c> chefList;
+    
+    public SignInController(){
+		chefList = [SELECT ID, Login__c, Password__c FROM Chef__c];        
+    }
+    
+    public PageReference sign(){
+        if((String.isEmpty(login)  && String.isEmpty(password))|| String.isEmpty(password) || String.isEmpty(login)){
+            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO,'Enter your login and password'));
+      		return null;
+        }
+        else {
+        	for (Chef__c ch : chefList){
+            	if (ch.Login__c == login && ch.Password__c == password){
+                	Site.login(login, password, startURL);
+                	return new PageReference(startURL);
+            	}
+            	else {
+                	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO,'Please check value'));
+      				return null;
+            	}
+        	}
+        }
+        return null;        
+    }
+    
+    public PageReference forgot(){
+        return Page.password;
+    }
+    
+    public PageReference create(){
+        return Page.create;
+    }
+}
