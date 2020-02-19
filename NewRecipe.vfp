@@ -1,0 +1,76 @@
+<apex:page controller="NewRecipeController">
+    <apex:pageMessages />
+    <apex:form >
+        <apex:pageBlock title="New Recipe" >          
+            
+            <apex:pageBlockSection title="Add new ingredient" rendered="true">
+                <apex:pageBlockSectionItem >
+            		<apex:outputLabel value="Ingredient" for="newIngredientName"/>
+                	<apex:inputText id="newIngredientName" value="{!newIngredientName}" style="width: 220px;"/>
+            	</apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+            		<apex:outputLabel value="Amount" for="newIngredientAmount"/>
+                	<apex:inputText id="newIngredientAmount" value="{!newIngredientAmount}" style="width: 220px;"/>
+            	</apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+            		<apex:outputLabel value="Calories" for="newIngredientCalorie"/>
+                	<apex:inputText id="newIngredientCalorie" value="{!newIngredientCalorie}" style="width: 220px;"/>
+            	</apex:pageBlockSectionItem>              
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Unit"/>
+                    <apex:selectList size="1" multiselect="false" style="width: 220px:" value="{!newIngredientUnit}"> 
+       	 				<apex:selectOptions value="{!units}"/>  
+            		</apex:selectList>
+                </apex:pageBlockSectionItem>
+                <div align="center">
+                	<apex:commandButton value="Add Ingredient" action="{!addIngredient}"/>
+            	</div> 
+            </apex:pageBlockSection>
+            
+            <br/><b>List of ingredients in stock</b>
+            <div style="overflow: auto; height: 200px;">
+                <apex:pageBlockTable value="{!listIngredient}" var="item">
+                	<apex:column value="{!item.Name}"/>
+                	<apex:column value="{!item.Amount__c}"/>
+                	<apex:column value="{!item.Unit__c}"/>
+            	</apex:pageBlockTable> <br/>
+            </div> <br/> 
+           
+            <apex:pageBlockSection title="Create new recipe" rendered="true">
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="New recipe name" for="newRecipe"/>
+            		<apex:inputText id="newRecipe" value="{!newRecipe}" style="width: 220px;"/>                  
+                </apex:pageBlockSectionItem> 
+                <apex:commandButton value="Add recipe name" action="{!addName}"/>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Recipe" for="recipeName" />
+                    <apex:selectList id="recipeName" size="1" multiselect="false" style="width: 220px:" value="{!recipeName}"> 
+       	 				<apex:selectOptions value="{!recipes}"/>                        
+            		</apex:selectList>
+                </apex:pageBlockSectionItem>                
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Ingredient" for="newSpecIngr"/>
+                    <apex:selectList id="newSpecIngr" size="1" multiselect="false" style="width: 220px:" value="{!newSpecIngr}"> 
+       	 				<apex:selectOptions value="{!ingredients}"/>  
+            		</apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                	<apex:outputLabel value="Quantity" for="newSpecIngrQuantity"/>
+                	<apex:inputText id="newSpecIngrQuantity" value="{!newSpecIngrQuantity}" style="width: 220px;"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Unit"/>
+                    <apex:selectList size="1" multiselect="false" style="width: 220px:" value="{!newIngredientUnit}"> 
+       	 				<apex:selectOptions value="{!units}"/>  
+            		</apex:selectList>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection> 
+            <div align="center">
+            	<apex:commandButton value="Add ingredient to recipe" action="{!addIngredToRecipe}"/>            		
+            </div>
+            <div align="right">
+                 <apex:commandButton value="Back" action="{!back}"/> 
+            </div>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
