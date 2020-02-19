@@ -1,0 +1,32 @@
+<apex:page controller="ChefAfterLoginController">  
+	<apex:pageMessages />    
+    <apex:form > 
+        <apex:pageBlock title="Dish List">
+        	<apex:selectList size="1" value="{!dishes}" style="width: 200px;"> 
+       	 		<apex:selectOptions value="{!items}"/>  
+                <apex:actionSupport event="onchange" action="{!showIngreds}" reRender="relatedIngredientsBlock"/>
+            </apex:selectList><br/><br/>            
+            <b>Recipe Ingredients</b>
+			<apex:pageblockTable value="{!ingrList}" var="ingr" id="relatedIngredientsBlock">
+                <apex:column value="{!ingr.Name}"/>
+                <apex:column value="{!ingr.Quantity__c}"/>
+                <apex:column value="{!ingr.Unit__c}"/>
+            </apex:pageblockTable><br/>
+            <div>
+                <apex:commandButton value="New Recipe" action="{!addNewRecipe}" style="left:100px;position:relative;"/>
+                <apex:commandButton value="New Order" action="{!addNewOrder}" style="left:200px;position:relative;"/>
+            </div> 
+			<div align="center">
+                <apex:commandButton value="Cook" action="{!cook}"/>
+            </div>             
+            <b>List of ingredients in stock</b>
+            <div style="overflow: auto; height: 350px;">
+                <apex:pageBlockTable value="{!ingredientList}" var="item" >
+                	<apex:column value="{!item.Name}"/>
+                 	<apex:column value="{!item.Amount__c}"/>
+                 	<apex:column value="{!item.Unit__c}"/>
+            	</apex:pageBlockTable>
+            </div>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
