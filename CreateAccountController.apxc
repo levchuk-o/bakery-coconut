@@ -1,0 +1,48 @@
+public class CreateAccountController {
+    public List<Chef__c> listChef {get; set;}
+    public String fName {get; set;}
+    public String lName {get; set;}
+    public String email {get; set;}
+    public String password {get; set {password = value == null ? value : value.trim(); } }
+    public String confirmPassword {get; set { confirmPassword = value == null ? value : value.trim(); } }
+    
+    public CreateAccountController(){
+        listChef = [SELECT ID, Login__c, Password__c, Email__c FROM Chef__c];
+    }
+    
+    private boolean isValidPassword() {
+        return password == confirmPassword;
+    }
+
+    
+    public PageReference create(){
+        if (!isValidPassword()){
+            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'Passwords don\'t match'));
+            return null;
+        }
+        for (Chef__c ch : listChef){
+            if (ch.Login__c == email){
+                ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'A user with such email is already existing'));
+            	return null;
+            }
+        }
+        if (String.isEmpty(fName) || String.isEmpty(lName) || String.isEmpty(email) || String.isEmpty(password) || String.isEmpty(confirmPassword)) {
+            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'All fields should have valid values'));
+            return null;
+        }
+        Chef__c newChef = new Chef__c();
+        newChef.First_Name__c = fName;
+        newChef.Last_Name__c = lName;
+        newChef.Email__c = email;
+        newChef.Login__c = email;
+        newChef.Password__c = password;
+        listChef.add(newChef);
+        upsert listChef;
+        ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO,'New user succeseful created'));
+        return new PageReference('http://www.google.com');
+    }
+    
+    public PageReference back(){
+        return Page.sign;
+    }
+}
