@@ -1,0 +1,37 @@
+<apex:page controller="CreateAccountController">
+    <apex:pageMessages />
+    <apex:form > 
+    <style>
+   		body { 
+    			margin-right: 35%; 
+    			margin-left: 35%; 
+   			}
+  	</style>
+    	<apex:pageBlock title="Create Account">
+            <apex:pageBlockSection columns="1" rendered="true">                  
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="First Name" for="fName" />
+                    <apex:inputText id="fName" value="{!fName}" style="width: 220px;"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Last Name" for="lName"/>
+                    <apex:inputText id="lName" value="{!lName}" style="width: 220px;"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Email" for="email"/>
+                    <apex:inputText id="email" value="{!email}" style="width: 220px;"/>
+                </apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Password" for="password"/>
+                    <apex:inputSecret id="password" value="{!password}" style="width: 220px;"/>
+                </apex:pageBlockSectionItem>
+				<apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Re-enter Password" for="confirmPassword"/>
+                    <apex:inputSecret id="confirmPassword" value="{!confirmPassword}" style="width: 220px;"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+                <apex:commandButton value="Create" action="{!create}" style="left:170px;position:relative;"/>
+                <apex:commandButton value="Back" action="{!back}" style="left:370px;position:relative;"/>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
