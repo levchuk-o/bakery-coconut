@@ -1,0 +1,87 @@
+public with sharing class NewOrderController {
+    
+    public String ingrName {get; set;}
+    public Integer quantity {get; set;}
+    public Date deliveryDate {get; set;}
+    public String address {get; set;}
+    public List<Ingredient_To_Order__c> ingredToOrderList {get;set;}
+    public List<Order_Ingredient__c> orderList {get; set;}
+    public List<SelectOption> ListIngred = new List<SelectOption>();
+    public List<Ingredient__c> ingredList {get;set;}
+    public Order_Ingredient__c newOrder {get; set;}
+    
+    public NewOrderController(){
+        orderList = new List<Order_Ingredient__c>();
+        ingredList = [SELECT Name, 	Amount__c, 	Unit__c, Calories__c, (SELECT Name, Quantity__c FROM  Ingredients_To_Orders__r) FROM Ingredient__c ORDER BY Name];
+        newOrder = new Order_Ingredient__c ();
+    }
+    
+    public List<SelectOption> getListIngred() { //get unit picklist
+    	List<SelectOption> options = new List<SelectOption>();
+        options.add(new SelectOption('', '--- Select Ingredient ---'));
+        for (Ingredient__c ingredItem : [SELECT Name FROM Ingredient__c]){
+            options.add(new SelectOption(ingredItem.Name, ingredItem.Name));
+        }
+        return options;
+    }       
+    
+    public PageReference add(){
+        if(String.isEmpty(ingrName) || String.isEmpty(String.valueOf(quantity)) || String.isEmpty(address) || String.isEmpty(String.valueOf(deliveryDate))){
+            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'All fields must have values'));
+        }
+        else if (quantity <= 0){
+            ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'Ingredient quantity cann\'t be less than or equal 0'));
+        }
+        else if (deliveryDate < Date.today()){
+             ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'Date cann\'t be earlier than today date'));
+        }
+        else{
+        	try{
+            	ingredToOrderList = new List<Ingredient_To_Order__c>();
+            	Ingredient_To_Order__c newIngredToOrder = new Ingredient_To_Order__c();
+        		newIngredToOrder.Name = ingrName;
+            	newIngredToOrder.Quantity__c = quantity;
+            	for (Ingredient__c i : ingredList){
+                	if(i.Name == ingrName){
+                    	newIngredToOrder.Ingredient__r = i;
+                        newIngredToOrder.Ingredient__c = i.Id;
+                	}                
+            	}
+            	newOrder.Address__c = address;
+            	newOrder.Delivery_Date__c = deliveryDate;
+            	orderList.add(newOrder);
+            	upsert orderList;
+            	for (Order_Ingredient__c oi : orderList){
+                	if(oi.Address__c == address && oi.Delivery_Date__c == deliveryDate){
+                    	newIngredToOrder.Order_Ingredient__r = oi;
+                        newIngredToOrder.Order_Ingredient__c = oi.Id;
+                	}
+            	}
+            	ingredToOrderList.add(newIngredToOrder);
+            	upsert ingredToOrderList; 
+                ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO, 'New ingredient to order succeseful added'));
+        	}
+        	catch(Exception e){
+            	System.debug(e);
+        	}
+        }
+        return null;
+    }
+    
+    public PageReference back(){
+        return Page.ChefPageAfterLogin;
+    }
+    
+    public PageReference updateStock(){
+        for (Ingredient_To_Order__c iTO: ingredToOrderList){
+            for (Ingredient__c i : ingredList){
+                if (iTo.Name == i.Name){
+                    i.Amount__c = i.Amount__c + quantity;
+                    ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO, 'Quantity ingredient: ' + i.Name + ' updated in stock'));
+                }
+            }
+        }
+        update ingredList;
+        return null;
+    }
+}
