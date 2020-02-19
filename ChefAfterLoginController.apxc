@@ -1,0 +1,53 @@
+public with sharing class ChefAfterLoginController {
+    
+    public Id dishes {get; set;}
+    public List<Specific_Ingredient__c> ingrList {get; set;}
+    public List<Ingredient__c> ingredientList {get; set;} 
+    
+    public ChefAfterLoginController(){
+        ingredientList = [SELECT Name, Amount__c, Unit__c FROM Ingredient__c ORDER BY Name];
+    }
+    
+    public List<SelectOption> getItems() { //create picklist with avaliable dishes
+    	List<SelectOption> options = new List<SelectOption>();
+        options.add(new SelectOption('', '--- Select Dish ---'));
+        for (Recipe__c dishItem : [SELECT Name FROM Recipe__c WHERE Chef__r.Name = 'newChef']){
+            options.add(new SelectOption(dishItem.Id, dishItem.Name));
+        }
+        return options;
+    }
+    
+    public PageReference showIngreds(){ //show related spec. ingredient with dish
+        ingrList = [SELECT Name, Quantity__c, Unit__c
+                    FROM Specific_Ingredient__c WHERE Recipe__r.Id =: dishes ORDER BY Name];       
+        return null;                     
+    }
+    
+    public PageReference addNewRecipe(){
+        return Page.NewRecipe;
+    }
+    
+    public PageReference addNewOrder(){
+        return Page.NewOrder;
+    }
+    
+    public PageReference cook(){
+        for (Specific_Ingredient__c specIngr : ingrList){
+            for (Ingredient__c ingr : ingredientList){
+                if (specIngr.Name == ingr.Name){
+                    if (ingr.Amount__c < specIngr.Quantity__c) {
+                	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.ERROR,'We don\'t have enough ' + ingr.Name + '. Need An Order.'));    
+					}
+                    else {
+                        ingr.Amount__c = ingr.Amount__c - specIngr.Quantity__c;
+                    	ApexPages.addmessage(new ApexPages.message(ApexPages.severity.INFO,'Chef started cook.'));        
+                    }
+                }
+            }
+        } 
+        if (ApexPages.hasMessages(ApexPages.severity.INFO)){
+            update ingredientList;
+        }
+        return null;
+    }    
+}
