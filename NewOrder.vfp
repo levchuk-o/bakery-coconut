@@ -1,0 +1,45 @@
+<apex:page controller="NewOrderController" docType="html-5.0">
+    <apex:pageMessages /> 
+    <apex:form >
+        <apex:pageBlock title="New Order">                    
+            <br/><b>Ingredients</b>
+            <apex:pageBlockSection >
+				<apex:pageBlockSectionItem >                    
+                	<apex:outputLabel value="Ingredient" for="ingrName"/>
+                    <apex:selectList id="ingrName" size="1" multiselect="false" style="width: 220px:" value="{!ingrName}"> 
+       	 				<apex:selectOptions value="{!ListIngred}"/>  
+            		</apex:selectList>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Quantity" for="quantity"/>
+                    <apex:inputText id="quantity" value="{!quantity}" style="width: 220px;"/>
+                </apex:pageBlockSectionItem>
+                <apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Delivery Date" />
+                    <apex:input type="date" value="{!deliveryDate}"/>
+           		</apex:pageBlockSectionItem>
+            	<apex:pageBlockSectionItem >
+                    <apex:outputLabel value="Address" for="address"/>
+                    <apex:inputText id="address" value="{!address}" style="width: 220px;"/>
+           		</apex:pageBlockSectionItem>       
+            </apex:pageBlockSection>
+            <div align="center">
+                <apex:commandButton value="Add ingredient to order" action="{!add}"/>
+            </div> 
+            <div align="right">
+                <apex:commandButton value="Back" action="{!back}"/>
+            </div> 
+            <b>List ingredients for order</b>
+            <div style="auto: scroll;">
+                <apex:pageBlockTable value="{!ingredToOrderList}" var="item" >
+                	<apex:column value="{!item.Ingredient__r.Name}"/>
+                 	<apex:column value="{!item.Quantity__c}"/>
+                 	<apex:column value="{!item.Ingredient__r.Unit__c}"/>
+            	</apex:pageBlockTable>
+            </div>
+            <div align="center">
+                <apex:commandButton action="{!updateStock}" value="Update stock"/>              
+            </div>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
